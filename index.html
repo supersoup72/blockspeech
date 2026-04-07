@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -7,628 +6,606 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>OpenSpeak AAC</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #f0f4ff;
-    --surface: #ffffff;
-    --surface2: #e8eeff;
-    --border: #d0d8f0;
-    --accent: #4a6cf7;
-    --accent2: #7c3aed;
-    --accent-glow: rgba(74,108,247,0.18);
-    --text: #1a1d2e;
-    --text-soft: #5a6080;
-    --sentence-bg: #1a1d2e;
-    --sentence-text: #ffffff;
-    --cat-people: #f97316;
-    --cat-feelings: #ec4899;
-    --cat-actions: #10b981;
-    --cat-objects: #3b82f6;
-    --cat-places: #8b5cf6;
-    --cat-phrases: #f59e0b;
-    --cat-descriptors: #06b6d4;
-    --cat-questions: #ef4444;
-    --radius: 14px;
-    --shadow: 0 4px 18px rgba(74,108,247,0.10);
-    --shadow-lg: 0 8px 32px rgba(74,108,247,0.18);
-  }
+:root {
+  --bg:#f0f4ff; --surface:#fff; --surface2:#e8eeff; --border:#d0d8f0;
+  --accent:#4a6cf7; --accent2:#7c3aed; --text:#1a1d2e; --text-soft:#5a6080;
+  --bar-bg:#1a1d2e;
+  --cat-people:#f97316; --cat-feelings:#ec4899; --cat-actions:#10b981;
+  --cat-objects:#3b82f6; --cat-places:#8b5cf6; --cat-phrases:#f59e0b;
+  --cat-descriptors:#06b6d4; --cat-questions:#ef4444;
+  --r:14px; --sh:0 4px 18px rgba(74,108,247,.10); --sh2:0 8px 32px rgba(74,108,247,.18);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);
+  height:100dvh;display:flex;flex-direction:column;overflow:hidden;user-select:none}
 
-- { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+/* Header */
+header{background:var(--surface);border-bottom:2px solid var(--border);
+  padding:10px 14px 8px;flex-shrink:0;box-shadow:var(--sh)}
+.app-title{font-size:12px;font-weight:800;color:var(--accent);
+  letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
 
-body {
-font-family: ‘Nunito’, sans-serif;
-background: var(–bg);
-color: var(–text);
-height: 100dvh;
-display: flex;
-flex-direction: column;
-overflow: hidden;
-user-select: none;
-}
+/* Sentence bar — chips live in #chipArea, placeholder in #sbPlaceholder */
+.sentence-bar{background:var(--bar-bg);border-radius:var(--r);
+  min-height:52px;padding:8px 10px}
+#chipArea{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:36px}
+#sbPlaceholder{color:rgba(255,255,255,.32);font-size:14px;
+  font-style:italic;font-weight:600;pointer-events:none}
+.word-chip{background:rgba(255,255,255,.13);color:#fff;border-radius:8px;
+  padding:5px 11px;font-size:14px;font-weight:700;cursor:pointer;
+  border:1px solid rgba(255,255,255,.2);
+  animation:chipIn .18s cubic-bezier(.34,1.56,.64,1) both}
+.word-chip:active{transform:scale(.92)}
+@keyframes chipIn{from{opacity:0;transform:scale(.7) translateY(-5px)}to{opacity:1;transform:none}}
 
-/* ── Header ── */
-header {
-background: var(–surface);
-border-bottom: 2px solid var(–border);
-padding: 10px 14px 8px;
-flex-shrink: 0;
-box-shadow: var(–shadow);
-}
+/* Controls */
+.controls{display:flex;gap:7px;margin-top:8px;align-items:center}
+.btn{border:none;border-radius:10px;font-family:'Nunito',sans-serif;
+  font-weight:800;cursor:pointer;display:flex;align-items:center;gap:5px;
+  transition:transform .1s,filter .15s,box-shadow .15s}
+.btn:active{transform:scale(.92)}
+.btn-speak{background:linear-gradient(135deg,#4a6cf7,#7c3aed);color:#fff;
+  padding:9px 18px;font-size:14px;flex:1;
+  box-shadow:0 4px 14px rgba(74,108,247,.38)}
+.btn-speak.speaking{animation:pulse .6s infinite alternate}
+@keyframes pulse{from{box-shadow:0 4px 14px rgba(74,108,247,.38)}to{box-shadow:0 4px 28px rgba(124,58,237,.75)}}
+.btn-sm{background:var(--surface2);color:var(--text-soft);
+  padding:9px 13px;font-size:15px;border:2px solid var(--border)}
+.btn-write{background:var(--surface2);color:var(--accent);
+  padding:9px 12px;font-size:12px;font-weight:800;border:2px solid var(--border);white-space:nowrap}
+.btn-write.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 
-.app-title {
-font-size: 13px;
-font-weight: 800;
-color: var(–accent);
-letter-spacing: 0.12em;
-text-transform: uppercase;
-margin-bottom: 8px;
-}
+/* TTS Writer Panel */
+.tts-panel{display:none;flex-direction:column;gap:8px;
+  background:var(--surface);border-bottom:2px solid var(--border);
+  padding:10px 14px;flex-shrink:0}
+.tts-panel.open{display:flex}
+.tts-panel label{font-size:11px;font-weight:800;color:var(--text-soft);
+  text-transform:uppercase;letter-spacing:.08em}
+.tts-textarea{width:100%;border:2px solid var(--border);border-radius:10px;
+  padding:10px 12px;font-family:'Nunito',sans-serif;font-size:15px;
+  font-weight:600;color:var(--text);resize:none;background:var(--bg);
+  outline:none;min-height:52px}
+.tts-textarea:focus{border-color:var(--accent)}
+.tts-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.slider-grp{display:flex;flex-direction:column;gap:3px;flex:1;min-width:90px}
+.slider-grp label{font-size:10px}
+input[type=range]{-webkit-appearance:none;height:6px;border-radius:4px;
+  background:var(--surface2);outline:none;width:100%}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;
+  background:var(--accent);border-radius:50%;cursor:pointer;
+  box-shadow:0 2px 6px rgba(74,108,247,.4)}
+select.mini{border:2px solid var(--border);border-radius:8px;padding:5px 7px;
+  font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;
+  background:var(--bg);color:var(--text);outline:none}
+select.mini:focus{border-color:var(--accent)}
+.btn-say{background:linear-gradient(135deg,#10b981,#059669);color:#fff;
+  padding:9px 14px;font-size:13px;white-space:nowrap;
+  box-shadow:0 4px 12px rgba(16,185,129,.3)}
 
-/* ── Sentence Bar ── */
-.sentence-bar {
-background: var(–sentence-bg);
-border-radius: var(–radius);
-padding: 10px 12px;
-min-height: 52px;
-display: flex;
-align-items: center;
-gap: 8px;
-flex-wrap: wrap;
-position: relative;
-}
+/* Voice row */
+.voice-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.gender-btn{border:2px solid var(--border);border-radius:8px;padding:5px 12px;
+  font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;
+  cursor:pointer;background:var(--surface2);color:var(--text-soft);transition:all .15s}
+.gender-btn.on{border-color:var(--accent);background:var(--accent);color:#fff}
 
-.sentence-bar .placeholder {
-color: rgba(255,255,255,0.35);
-font-size: 15px;
-font-style: italic;
-font-weight: 600;
-}
+/* Category tabs */
+.cat-tabs{display:flex;gap:6px;padding:10px 14px 0;overflow-x:auto;
+  scrollbar-width:none;flex-shrink:0}
+.cat-tabs::-webkit-scrollbar{display:none}
+.cat-tab{border:none;border-radius:20px;padding:6px 14px;
+  font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;
+  cursor:pointer;white-space:nowrap;color:#fff;opacity:.5;transition:opacity .15s,transform .1s}
+.cat-tab:active{transform:scale(.93)}
+.cat-tab.on{opacity:1;box-shadow:0 3px 10px rgba(0,0,0,.18)}
 
-.word-chip {
-background: rgba(255,255,255,0.12);
-color: #fff;
-border-radius: 8px;
-padding: 4px 10px;
-font-size: 15px;
-font-weight: 700;
-cursor: pointer;
-border: 1px solid rgba(255,255,255,0.18);
-transition: background 0.15s, transform 0.1s;
-animation: chipIn 0.18s cubic-bezier(.34,1.56,.64,1);
-}
-.word-chip:hover { background: rgba(255,255,255,0.2); transform: scale(1.05); }
-.word-chip:active { transform: scale(0.95); }
-@keyframes chipIn {
-from { opacity: 0; transform: scale(0.7) translateY(-6px); }
-to   { opacity: 1; transform: scale(1) translateY(0); }
-}
+/* Symbol grid */
+.grid-wrap{flex:1;overflow-y:auto;padding:10px 14px 14px;
+  scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.sym-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:8px}
+.sym-btn{background:var(--surface);border:2px solid var(--border);
+  border-radius:var(--r);padding:10px 6px 8px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  box-shadow:var(--sh);min-height:80px;transition:transform .12s,box-shadow .12s}
+.sym-btn:hover{transform:translateY(-2px);box-shadow:var(--sh2)}
+.sym-btn:active{transform:scale(.91);box-shadow:none}
+.sym-btn.phrase{grid-column:span 2;flex-direction:row;
+  justify-content:flex-start;padding:10px 14px;min-height:auto}
+.sym-btn.phrase .sym-emoji{font-size:22px}
+.sym-btn.phrase .sym-label{text-align:left;font-size:12px}
+.sym-emoji{font-size:26px;line-height:1}
+.sym-label{font-size:11px;font-weight:800;text-align:center;
+  color:var(--text);line-height:1.2;word-break:break-word}
+.cat-people{border-top:3px solid var(--cat-people)}
+.cat-feelings{border-top:3px solid var(--cat-feelings)}
+.cat-actions{border-top:3px solid var(--cat-actions)}
+.cat-objects{border-top:3px solid var(--cat-objects)}
+.cat-places{border-top:3px solid var(--cat-places)}
+.cat-phrases{border-top:3px solid var(--cat-phrases)}
+.cat-descriptors{border-top:3px solid var(--cat-descriptors)}
+.cat-questions{border-top:3px solid var(--cat-questions)}
 
-/* ── Sentence Controls ── */
-.sentence-controls {
-display: flex;
-gap: 8px;
-margin-top: 8px;
-align-items: center;
-}
-
-.btn {
-border: none;
-border-radius: 10px;
-font-family: ‘Nunito’, sans-serif;
-font-weight: 800;
-cursor: pointer;
-transition: transform 0.1s, box-shadow 0.15s, filter 0.15s;
-display: flex;
-align-items: center;
-gap: 5px;
-}
-.btn:active { transform: scale(0.93); }
-
-.btn-speak {
-background: linear-gradient(135deg, #4a6cf7, #7c3aed);
-color: white;
-padding: 9px 18px;
-font-size: 15px;
-box-shadow: 0 4px 14px rgba(74,108,247,0.38);
-flex: 1;
-}
-.btn-speak:hover { box-shadow: 0 6px 20px rgba(74,108,247,0.5); filter: brightness(1.07); }
-.btn-speak.speaking { animation: pulse 0.6s infinite alternate; }
-@keyframes pulse {
-from { box-shadow: 0 4px 14px rgba(74,108,247,0.38); }
-to   { box-shadow: 0 4px 28px rgba(124,58,237,0.7); }
-}
-
-.btn-clear {
-background: var(–surface2);
-color: var(–text-soft);
-padding: 9px 14px;
-font-size: 14px;
-border: 2px solid var(–border);
-}
-.btn-clear:hover { background: #fde8e8; color: #e53e3e; border-color: #fca5a5; }
-
-.btn-backspace {
-background: var(–surface2);
-color: var(–text-soft);
-padding: 9px 13px;
-font-size: 16px;
-border: 2px solid var(–border);
-}
-.btn-backspace:hover { background: #fef3c7; color: #d97706; border-color: #fcd34d; }
-
-/* ── TTS Writer toggle ── */
-.btn-tts-toggle {
-background: var(–surface2);
-color: var(–accent);
-padding: 9px 12px;
-font-size: 13px;
-font-weight: 800;
-border: 2px solid var(–border);
-letter-spacing: 0.03em;
-}
-.btn-tts-toggle.active { background: var(–accent); color: white; border-color: var(–accent); }
-
-/* ── TTS Writer Panel ── */
-.tts-panel {
-display: none;
-background: var(–surface);
-border-bottom: 2px solid var(–border);
-padding: 10px 14px;
-gap: 8px;
-flex-direction: column;
-flex-shrink: 0;
-}
-.tts-panel.open { display: flex; }
-
-.tts-panel label {
-font-size: 12px;
-font-weight: 800;
-color: var(–text-soft);
-text-transform: uppercase;
-letter-spacing: 0.1em;
-}
-
-.tts-textarea {
-width: 100%;
-border: 2px solid var(–border);
-border-radius: 10px;
-padding: 10px 12px;
-font-family: ‘Nunito’, sans-serif;
-font-size: 15px;
-font-weight: 600;
-color: var(–text);
-resize: none;
-background: var(–bg);
-outline: none;
-min-height: 56px;
-transition: border-color 0.15s;
-}
-.tts-textarea:focus { border-color: var(–accent); }
-
-.tts-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-
-.tts-slider-group {
-display: flex;
-flex-direction: column;
-gap: 2px;
-flex: 1;
-min-width: 100px;
-}
-.tts-slider-group label { font-size: 11px; }
-input[type=range] {
--webkit-appearance: none;
-height: 6px;
-border-radius: 4px;
-background: var(–surface2);
-outline: none;
-width: 100%;
-}
-input[type=range]::-webkit-slider-thumb {
--webkit-appearance: none;
-width: 18px; height: 18px;
-background: var(–accent);
-border-radius: 50%;
-cursor: pointer;
-box-shadow: 0 2px 6px rgba(74,108,247,0.4);
-}
-
-.btn-tts-speak {
-background: linear-gradient(135deg, #10b981, #059669);
-color: white;
-padding: 9px 16px;
-font-size: 14px;
-box-shadow: 0 4px 12px rgba(16,185,129,0.3);
-}
-.btn-tts-speak:hover { filter: brightness(1.07); }
-
-/* ── Category Tabs ── */
-.cat-tabs {
-display: flex;
-gap: 6px;
-padding: 10px 14px 0;
-overflow-x: auto;
-scrollbar-width: none;
-flex-shrink: 0;
-background: var(–bg);
-}
-.cat-tabs::-webkit-scrollbar { display: none; }
-
-.cat-tab {
-border: none;
-border-radius: 20px;
-padding: 6px 14px;
-font-family: ‘Nunito’, sans-serif;
-font-size: 13px;
-font-weight: 800;
-cursor: pointer;
-white-space: nowrap;
-transition: transform 0.1s, opacity 0.15s;
-opacity: 0.55;
-color: white;
-}
-.cat-tab:active { transform: scale(0.94); }
-.cat-tab.active { opacity: 1; box-shadow: 0 3px 10px rgba(0,0,0,0.18); }
-
-/* ── Symbol Grid ── */
-.grid-container {
-flex: 1;
-overflow-y: auto;
-padding: 10px 14px 14px;
-scrollbar-width: thin;
-scrollbar-color: var(–border) transparent;
-}
-
-.symbol-grid {
-display: grid;
-grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-gap: 8px;
-}
-
-.symbol-btn {
-background: var(–surface);
-border: 2px solid var(–border);
-border-radius: var(–radius);
-padding: 10px 6px 8px;
-cursor: pointer;
-display: flex;
-flex-direction: column;
-align-items: center;
-gap: 6px;
-transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
-box-shadow: var(–shadow);
-min-height: 80px;
-position: relative;
-overflow: hidden;
-}
-.symbol-btn::before {
-content: ‘’;
-position: absolute;
-inset: 0;
-border-radius: calc(var(–radius) - 2px);
-opacity: 0;
-transition: opacity 0.15s;
-}
-.symbol-btn:hover { transform: translateY(-2px); box-shadow: var(–shadow-lg); }
-.symbol-btn:active { transform: scale(0.93) translateY(0); box-shadow: none; }
-.symbol-btn:active::before { opacity: 0.12; }
-
-.symbol-btn.phrase {
-grid-column: span 2;
-flex-direction: row;
-justify-content: flex-start;
-padding: 10px 14px;
-min-height: auto;
-}
-.symbol-btn.phrase .symbol-emoji { font-size: 22px; }
-.symbol-btn.phrase .symbol-label { font-size: 13px; text-align: left; }
-
-.symbol-emoji { font-size: 28px; line-height: 1; }
-.symbol-label {
-font-size: 11px;
-font-weight: 800;
-text-align: center;
-color: var(–text);
-line-height: 1.2;
-word-break: break-word;
-}
-
-/* Category color accents */
-.cat-people   { border-top: 3px solid var(–cat-people);   }
-.cat-feelings { border-top: 3px solid var(–cat-feelings); }
-.cat-actions  { border-top: 3px solid var(–cat-actions);  }
-.cat-objects  { border-top: 3px solid var(–cat-objects);  }
-.cat-places   { border-top: 3px solid var(–cat-places);   }
-.cat-phrases  { border-top: 3px solid var(–cat-phrases);  }
-.cat-descriptors { border-top: 3px solid var(–cat-descriptors); }
-.cat-questions { border-top: 3px solid var(–cat-questions); }
-
-/* Voice selector */
-.voice-select {
-border: 2px solid var(–border);
-border-radius: 8px;
-padding: 5px 8px;
-font-family: ‘Nunito’, sans-serif;
-font-size: 12px;
-font-weight: 700;
-background: var(–bg);
-color: var(–text);
-outline: none;
-flex: 1;
-min-width: 0;
-}
-.voice-select:focus { border-color: var(–accent); }
-
-/* Toast notification */
-.toast {
-position: fixed;
-bottom: 20px;
-left: 50%;
-transform: translateX(-50%) translateY(80px);
-background: var(–sentence-bg);
-color: white;
-padding: 10px 20px;
-border-radius: 30px;
-font-size: 14px;
-font-weight: 700;
-transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
-z-index: 100;
-pointer-events: none;
-}
-.toast.show { transform: translateX(-50%) translateY(0); }
+/* Toast */
+.toast{position:fixed;bottom:18px;left:50%;
+  transform:translateX(-50%) translateY(70px);
+  background:var(--bar-bg);color:#fff;padding:9px 20px;
+  border-radius:30px;font-size:13px;font-weight:700;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:99;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
 </style>
-
 </head>
 <body>
 
 <header>
   <div class="app-title">🗣 OpenSpeak AAC</div>
-  <div class="sentence-bar" id="sentenceBar">
-    <span class="placeholder" id="placeholder">Tap symbols to build a sentence…</span>
+  <div class="sentence-bar">
+    <div id="chipArea">
+      <span id="sbPlaceholder">Tap symbols to build a sentence…</span>
+    </div>
   </div>
-  <div class="sentence-controls">
+  <div class="controls">
     <button class="btn btn-speak" id="btnSpeak" onclick="speakSentence()">▶ Speak</button>
-    <button class="btn btn-backspace" onclick="backspace()" title="Remove last word">⌫</button>
-    <button class="btn btn-clear" onclick="clearSentence()" title="Clear all">✕ Clear</button>
-    <button class="btn btn-tts-toggle" id="btnTTSToggle" onclick="toggleTTS()">✏️ Write</button>
+    <button class="btn btn-sm" onclick="backspace()" title="Remove last word">⌫</button>
+    <button class="btn btn-sm" onclick="clearSentence()" title="Clear">✕</button>
+    <button class="btn btn-write" id="btnWrite" onclick="toggleTTS()">✏️ Write</button>
   </div>
 </header>
 
 <div class="tts-panel" id="ttsPanel">
   <label>Type anything to speak:</label>
   <textarea class="tts-textarea" id="ttsText" placeholder="Type your message here…" rows="2"></textarea>
-  <div class="tts-controls">
-    <div class="tts-slider-group">
+  <div class="voice-row">
+    <select class="mini" id="langSelect" onchange="onLangChange()" style="flex:0 0 auto"></select>
+    <button class="gender-btn" id="btnFemale" onclick="setGender('female')">♀ Female</button>
+    <button class="gender-btn" id="btnMale"   onclick="setGender('male')">♂ Male</button>
+    <select class="mini" id="voiceSelect" style="flex:1;min-width:0"></select>
+  </div>
+  <div class="tts-row">
+    <div class="slider-grp">
       <label>Speed: <span id="rateVal">1.0</span></label>
-      <input type="range" id="rateSlider" min="0.5" max="2" step="0.1" value="1.0" oninput="document.getElementById('rateVal').textContent=parseFloat(this.value).toFixed(1)">
+      <input type="range" id="rateSlider" min="0.5" max="2" step="0.1" value="1.0"
+        oninput="document.getElementById('rateVal').textContent=parseFloat(this.value).toFixed(1)">
     </div>
-    <div class="tts-slider-group">
+    <div class="slider-grp">
       <label>Pitch: <span id="pitchVal">1.0</span></label>
-      <input type="range" id="pitchSlider" min="0.5" max="2" step="0.1" value="1.0" oninput="document.getElementById('pitchVal').textContent=parseFloat(this.value).toFixed(1)">
+      <input type="range" id="pitchSlider" min="0.5" max="2" step="0.1" value="1.0"
+        oninput="document.getElementById('pitchVal').textContent=parseFloat(this.value).toFixed(1)">
     </div>
-    <select class="voice-select" id="voiceSelect"></select>
-    <button class="btn btn-tts-speak" onclick="speakCustom()">▶ Say It</button>
+    <button class="btn btn-say" onclick="speakCustom()">▶ Say It</button>
   </div>
 </div>
 
 <div class="cat-tabs" id="catTabs"></div>
-
-<div class="grid-container">
-  <div class="symbol-grid" id="symbolGrid"></div>
-</div>
-
+<div class="grid-wrap"><div class="sym-grid" id="symGrid"></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Data ──────────────────────────────────────────────────────────────────
-const categories = [
-  { id: 'all',         label: '⭐ All',        color: '#6366f1' },
-  { id: 'people',      label: '👤 People',     color: '#f97316' },
-  { id: 'feelings',    label: '😊 Feelings',   color: '#ec4899' },
-  { id: 'actions',     label: '🏃 Actions',    color: '#10b981' },
-  { id: 'objects',     label: '🍎 Objects',    color: '#3b82f6' },
-  { id: 'places',      label: '🏠 Places',     color: '#8b5cf6' },
-  { id: 'descriptors', label: '✨ Describing',  color: '#06b6d4' },
-  { id: 'questions',   label: '❓ Questions',  color: '#ef4444' },
-  { id: 'phrases',     label: '💬 Phrases',    color: '#f59e0b' },
+// ═══════════════════════════════════════════════════════════════════════════
+//  LANGUAGE CONFIG
+//  To add a language: copy a block, set code/label/flag/genderHints/accents.
+//  code       = BCP-47 prefix  (must match browser voice .lang)
+//  genderHints= substrings in voice names that suggest male/female
+//  accents    = regional variants shown as optgroups in voice picker
+// ═══════════════════════════════════════════════════════════════════════════
+const LANGUAGES = [
+  { code:'en', label:'English',    flag:'🇬🇧',
+    genderHints:{ female:['female','zira','samantha','karen','moira','tessa','fiona','victoria','susan','hazel'],
+                  male:  ['male','daniel','david','alex','tom','fred','lee','rishi','aaron','james'] },
+    accents:[ {label:'🇺🇸 US',langCode:'en-US'},{label:'🇬🇧 UK',langCode:'en-GB'},
+              {label:'🇦🇺 Australia',langCode:'en-AU'},{label:'🇮🇳 India',langCode:'en-IN'},
+              {label:'🇮🇪 Ireland',langCode:'en-IE'},{label:'🇿🇦 S. Africa',langCode:'en-ZA'} ] },
+
+  { code:'es', label:'Español',    flag:'🇪🇸',
+    genderHints:{ female:['female','paulina','monica','conchita','lucia'],
+                  male:  ['male','juan','jorge','diego','enrique','carlos'] },
+    accents:[ {label:'🇪🇸 España',langCode:'es-ES'},{label:'🇲🇽 México',langCode:'es-MX'},
+              {label:'🇺🇸 US Latino',langCode:'es-US'},{label:'🇦🇷 Argentina',langCode:'es-AR'},
+              {label:'🇨🇴 Colombia',langCode:'es-CO'} ] },
+
+  { code:'fr', label:'Français',   flag:'🇫🇷',
+    genderHints:{ female:['female','amelie','aurelie'],
+                  male:  ['male','thomas','nicolas'] },
+    accents:[ {label:'🇫🇷 France',langCode:'fr-FR'},{label:'🇨🇦 Canada',langCode:'fr-CA'},
+              {label:'🇧🇪 Belgique',langCode:'fr-BE'},{label:'🇨🇭 Suisse',langCode:'fr-CH'} ] },
+
+  { code:'de', label:'Deutsch',    flag:'🇩🇪',
+    genderHints:{ female:['female','anna','petra'],
+                  male:  ['male','markus','hans','stefan'] },
+    accents:[ {label:'🇩🇪 Deutschland',langCode:'de-DE'},{label:'🇦🇹 Österreich',langCode:'de-AT'},
+              {label:'🇨🇭 Schweiz',langCode:'de-CH'} ] },
+
+  { code:'pt', label:'Português',  flag:'🇧🇷',
+    genderHints:{ female:['female','joana','francisca'],
+                  male:  ['male','joao','rodrigo','felipe'] },
+    accents:[ {label:'🇧🇷 Brasil',langCode:'pt-BR'},{label:'🇵🇹 Portugal',langCode:'pt-PT'} ] },
+
+  { code:'it', label:'Italiano',   flag:'🇮🇹',
+    genderHints:{ female:['female','alice','federica'],
+                  male:  ['male','luca','matteo'] },
+    accents:[ {label:'🇮🇹 Italia',langCode:'it-IT'},{label:'🇨🇭 Svizzera',langCode:'it-CH'} ] },
+
+  { code:'zh', label:'中文',        flag:'🇨🇳',
+    genderHints:{ female:['female','meijia','tian-tian','sin-ji'],
+                  male:  ['male','lekiu','yu-shu'] },
+    accents:[ {label:'🇨🇳 Mandarin',langCode:'zh-CN'},{label:'🇹🇼 Taiwan',langCode:'zh-TW'},
+              {label:'🇭🇰 Cantonese',langCode:'zh-HK'} ] },
+
+  { code:'ja', label:'日本語',      flag:'🇯🇵',
+    genderHints:{ female:['female','kyoko','mizuki'],
+                  male:  ['male','otoya'] },
+    accents:[ {label:'🇯🇵 Japan',langCode:'ja-JP'} ] },
+
+  { code:'ar', label:'العربية',    flag:'🇸🇦',
+    genderHints:{ female:['female','laila'],
+                  male:  ['male','maged','hoda','tarik'] },
+    accents:[ {label:'🇸🇦 Saudi',langCode:'ar-SA'},{label:'🇪🇬 Egypt',langCode:'ar-EG'},
+              {label:'🇦🇪 UAE',langCode:'ar-AE'} ] },
+
+  { code:'hi', label:'हिन्दी',      flag:'🇮🇳',
+    genderHints:{ female:['female','lekha','kalpana'],
+                  male:  ['male','hemant','rishi'] },
+    accents:[ {label:'🇮🇳 India',langCode:'hi-IN'} ] },
+
+  // ── ADD MORE LANGUAGES HERE ──────────────────────────────────────────
+  // { code:'ko', label:'한국어', flag:'🇰🇷',
+  //   genderHints:{ female:['female','yuna'], male:['male','sora'] },
+  //   accents:[{ label:'🇰🇷 Korea', langCode:'ko-KR' }] },
+  //
+  // { code:'nl', label:'Nederlands', flag:'🇳🇱',
+  //   genderHints:{ female:['female','xander'], male:['male'] },
+  //   accents:[{ label:'🇳🇱 Netherlands', langCode:'nl-NL' },{label:'🇧🇪 Belgium',langCode:'nl-BE'}] },
 ];
 
-const symbols = [
-  // People
-  { id:1,  label:'I',         emoji:'🙋', cat:'people' },
-  { id:2,  label:'You',       emoji:'👉', cat:'people' },
-  { id:3,  label:'He',        emoji:'👦', cat:'people' },
-  { id:4,  label:'She',       emoji:'👧', cat:'people' },
-  { id:5,  label:'We',        emoji:'👥', cat:'people' },
-  { id:6,  label:'They',      emoji:'👫', cat:'people' },
-  { id:7,  label:'Mom',       emoji:'👩', cat:'people' },
-  { id:8,  label:'Dad',       emoji:'👨', cat:'people' },
-  { id:9,  label:'Friend',    emoji:'🤝', cat:'people' },
-  { id:10, label:'Doctor',    emoji:'🩺', cat:'people' },
-  { id:11, label:'Teacher',   emoji:'📚', cat:'people' },
-  // Feelings
-  { id:20, label:'Happy',     emoji:'😊', cat:'feelings' },
-  { id:21, label:'Sad',       emoji:'😢', cat:'feelings' },
-  { id:22, label:'Angry',     emoji:'😠', cat:'feelings' },
-  { id:23, label:'Scared',    emoji:'😨', cat:'feelings' },
-  { id:24, label:'Tired',     emoji:'😴', cat:'feelings' },
-  { id:25, label:'Hungry',    emoji:'🍽️', cat:'feelings' },
-  { id:26, label:'Thirsty',   emoji:'💧', cat:'feelings' },
-  { id:27, label:'Pain',      emoji:'🤕', cat:'feelings' },
-  { id:28, label:'Excited',   emoji:'🤩', cat:'feelings' },
-  { id:29, label:'Bored',     emoji:'😑', cat:'feelings' },
-  { id:30, label:'Love',      emoji:'❤️', cat:'feelings' },
-  { id:31, label:'Good',      emoji:'👍', cat:'feelings' },
-  { id:32, label:'Bad',       emoji:'👎', cat:'feelings' },
-  // Actions
-  { id:40, label:'Want',      emoji:'🤲', cat:'actions' },
-  { id:41, label:'Need',      emoji:'⚡', cat:'actions' },
-  { id:42, label:'Go',        emoji:'🚶', cat:'actions' },
-  { id:43, label:'Come',      emoji:'👋', cat:'actions' },
-  { id:44, label:'Eat',       emoji:'🍴', cat:'actions' },
-  { id:45, label:'Drink',     emoji:'🥤', cat:'actions' },
-  { id:46, label:'Sleep',     emoji:'😴', cat:'actions' },
-  { id:47, label:'Play',      emoji:'🎮', cat:'actions' },
-  { id:48, label:'Help',      emoji:'🆘', cat:'actions' },
-  { id:49, label:'Stop',      emoji:'🛑', cat:'actions' },
-  { id:50, label:'More',      emoji:'➕', cat:'actions' },
-  { id:51, label:'Finish',    emoji:'✅', cat:'actions' },
-  { id:52, label:'Like',      emoji:'😍', cat:'actions' },
-  { id:53, label:'Don\'t like',emoji:'🙅', cat:'actions' },
-  { id:54, label:'Have',      emoji:'✋', cat:'actions' },
-  { id:55, label:'See',       emoji:'👀', cat:'actions' },
-  { id:56, label:'Hear',      emoji:'👂', cat:'actions' },
-  { id:57, label:'Give',      emoji:'🎁', cat:'actions' },
-  { id:58, label:'Take',      emoji:'🤏', cat:'actions' },
-  { id:59, label:'Make',      emoji:'🔨', cat:'actions' },
-  // Objects
-  { id:70, label:'Water',     emoji:'💧', cat:'objects' },
-  { id:71, label:'Food',      emoji:'🍎', cat:'objects' },
-  { id:72, label:'Milk',      emoji:'🥛', cat:'objects' },
-  { id:73, label:'Juice',     emoji:'🧃', cat:'objects' },
-  { id:74, label:'Medicine',  emoji:'💊', cat:'objects' },
-  { id:75, label:'Blanket',   emoji:'🛏️', cat:'objects' },
-  { id:76, label:'Toy',       emoji:'🧸', cat:'objects' },
-  { id:77, label:'Phone',     emoji:'📱', cat:'objects' },
-  { id:78, label:'TV',        emoji:'📺', cat:'objects' },
-  { id:79, label:'Book',      emoji:'📖', cat:'objects' },
-  { id:80, label:'Music',     emoji:'🎵', cat:'objects' },
-  { id:81, label:'Ball',      emoji:'⚽', cat:'objects' },
-  { id:82, label:'Shoes',     emoji:'👟', cat:'objects' },
-  { id:83, label:'Clothes',   emoji:'👕', cat:'objects' },
-  // Places
-  { id:90, label:'Home',      emoji:'🏠', cat:'places' },
-  { id:91, label:'School',    emoji:'🏫', cat:'places' },
-  { id:92, label:'Hospital',  emoji:'🏥', cat:'places' },
-  { id:93, label:'Bathroom',  emoji:'🚽', cat:'places' },
-  { id:94, label:'Kitchen',   emoji:'🍳', cat:'places' },
-  { id:95, label:'Outside',   emoji:'🌳', cat:'places' },
-  { id:96, label:'Car',       emoji:'🚗', cat:'places' },
-  { id:97, label:'Park',      emoji:'🌿', cat:'places' },
-  { id:98, label:'Store',     emoji:'🛒', cat:'places' },
-  { id:99, label:'Bedroom',   emoji:'🛏️', cat:'places' },
-  // Descriptors
-  { id:110, label:'Big',       emoji:'🔵', cat:'descriptors' },
-  { id:111, label:'Small',     emoji:'🔹', cat:'descriptors' },
-  { id:112, label:'Hot',       emoji:'🔥', cat:'descriptors' },
-  { id:113, label:'Cold',      emoji:'🧊', cat:'descriptors' },
-  { id:114, label:'Fast',      emoji:'⚡', cat:'descriptors' },
-  { id:115, label:'Slow',      emoji:'🐢', cat:'descriptors' },
-  { id:116, label:'Loud',      emoji:'📢', cat:'descriptors' },
-  { id:117, label:'Quiet',     emoji:'🤫', cat:'descriptors' },
-  { id:118, label:'Now',       emoji:'⏰', cat:'descriptors' },
-  { id:119, label:'Later',     emoji:'🕐', cat:'descriptors' },
-  { id:120, label:'Yes',       emoji:'✅', cat:'descriptors' },
-  { id:121, label:'No',        emoji:'❌', cat:'descriptors' },
-  { id:122, label:'Please',    emoji:'🙏', cat:'descriptors' },
-  { id:123, label:'Thank you', emoji:'💛', cat:'descriptors' },
-  // Questions
-  { id:130, label:'What',      emoji:'❓', cat:'questions' },
-  { id:131, label:'Where',     emoji:'📍', cat:'questions' },
-  { id:132, label:'When',      emoji:'🕐', cat:'questions' },
-  { id:133, label:'Who',       emoji:'🧐', cat:'questions' },
-  { id:134, label:'Why',       emoji:'🤔', cat:'questions' },
-  { id:135, label:'How',       emoji:'💭', cat:'questions' },
-  { id:136, label:'Can I',     emoji:'🙋', cat:'questions' },
-  // Phrases (full sentences)
-  { id:150, label:'I want to go to the bathroom', emoji:'🚽', cat:'phrases', phrase:true },
-  { id:151, label:'I am hungry',                  emoji:'🍽️', cat:'phrases', phrase:true },
-  { id:152, label:'I am thirsty',                 emoji:'💧', cat:'phrases', phrase:true },
-  { id:153, label:'I need help',                  emoji:'🆘', cat:'phrases', phrase:true },
-  { id:154, label:'I am in pain',                 emoji:'🤕', cat:'phrases', phrase:true },
-  { id:155, label:'I want to go home',            emoji:'🏠', cat:'phrases', phrase:true },
-  { id:156, label:'I am tired',                   emoji:'😴', cat:'phrases', phrase:true },
-  { id:157, label:'I am happy',                   emoji:'😊', cat:'phrases', phrase:true },
-  { id:158, label:'I don\'t understand',          emoji:'🤷', cat:'phrases', phrase:true },
-  { id:159, label:'Please slow down',             emoji:'🐢', cat:'phrases', phrase:true },
-  { id:160, label:'Yes please',                   emoji:'✅', cat:'phrases', phrase:true },
-  { id:161, label:'No thank you',                 emoji:'❌', cat:'phrases', phrase:true },
-  { id:162, label:'Can I have more?',             emoji:'➕', cat:'phrases', phrase:true },
-  { id:163, label:'I want to play',               emoji:'🎮', cat:'phrases', phrase:true },
-  { id:164, label:'I am done',                    emoji:'✋', cat:'phrases', phrase:true },
-  { id:165, label:'I love you',                   emoji:'❤️', cat:'phrases', phrase:true },
+// ═══════════════════════════════════════════════════════════════════════════
+//  CATEGORIES
+//  To add: push a new { id, label, color } and add symbols below.
+// ═══════════════════════════════════════════════════════════════════════════
+const CATEGORIES = [
+  { id:'all',         label:'⭐ All',        color:'#6366f1' },
+  { id:'people',      label:'👤 People',     color:'#f97316' },
+  { id:'feelings',    label:'😊 Feelings',   color:'#ec4899' },
+  { id:'actions',     label:'🏃 Actions',    color:'#10b981' },
+  { id:'objects',     label:'🍎 Objects',    color:'#3b82f6' },
+  { id:'places',      label:'🏠 Places',     color:'#8b5cf6' },
+  { id:'descriptors', label:'✨ Describing', color:'#06b6d4' },
+  { id:'questions',   label:'❓ Questions',  color:'#ef4444' },
+  { id:'phrases',     label:'💬 Phrases',    color:'#f59e0b' },
 ];
 
-// ── State ──────────────────────────────────────────────────────────────────
-let sentence = [];
-let currentCat = 'all';
-let voices = [];
-let isSpeaking = false;
+// ═══════════════════════════════════════════════════════════════════════════
+//  SYMBOLS
+//  Each entry: { id (unique), emoji, cat, langs:{ en, es, fr, … } }
+//  phrase:true  → spans 2 columns, auto-speaks on tap
+//  Missing lang → falls back to English
+//
+//  TO ADD A SYMBOL: copy any entry, give it a new unique id, fill langs.
+//  TO ADD A PHRASE: set phrase:true and provide full sentences in langs.
+// ═══════════════════════════════════════════════════════════════════════════
+const SYMBOLS = [
+  // ── People ───────────────────────────────────────────────────────────────
+  {id:1,  emoji:'🙋', cat:'people', langs:{en:'I',       es:'Yo',       fr:'Je',    de:'Ich',    pt:'Eu',      it:'Io',         zh:'我',   ja:'私',      ar:'أنا',  hi:'मैं'}},
+  {id:2,  emoji:'👉', cat:'people', langs:{en:'You',     es:'Tú',       fr:'Tu',    de:'Du',     pt:'Você',    it:'Tu',         zh:'你',   ja:'あなた',   ar:'أنت',  hi:'तुम'}},
+  {id:3,  emoji:'👦', cat:'people', langs:{en:'He',      es:'Él',       fr:'Il',    de:'Er',     pt:'Ele',     it:'Lui',        zh:'他',   ja:'彼',      ar:'هو',   hi:'वह'}},
+  {id:4,  emoji:'👧', cat:'people', langs:{en:'She',     es:'Ella',     fr:'Elle',  de:'Sie',    pt:'Ela',     it:'Lei',        zh:'她',   ja:'彼女',    ar:'هي',   hi:'वह'}},
+  {id:5,  emoji:'👥', cat:'people', langs:{en:'We',      es:'Nosotros', fr:'Nous',  de:'Wir',    pt:'Nós',     it:'Noi',        zh:'我们', ja:'私たち',  ar:'نحن',  hi:'हम'}},
+  {id:6,  emoji:'👫', cat:'people', langs:{en:'They',    es:'Ellos',    fr:'Ils',   de:'Sie',    pt:'Eles',    it:'Loro',       zh:'他们', ja:'彼ら',    ar:'هم',   hi:'वे'}},
+  {id:7,  emoji:'👩', cat:'people', langs:{en:'Mom',     es:'Mamá',     fr:'Maman', de:'Mama',   pt:'Mãe',     it:'Mamma',      zh:'妈妈', ja:'お母さん', ar:'أمي',  hi:'माँ'}},
+  {id:8,  emoji:'👨', cat:'people', langs:{en:'Dad',     es:'Papá',     fr:'Papa',  de:'Papa',   pt:'Pai',     it:'Papà',       zh:'爸爸', ja:'お父さん', ar:'أبي',  hi:'पिताजी'}},
+  {id:9,  emoji:'🤝', cat:'people', langs:{en:'Friend',  es:'Amigo',    fr:'Ami',   de:'Freund', pt:'Amigo',   it:'Amico',      zh:'朋友', ja:'友達',    ar:'صديق', hi:'दोस्त'}},
+  {id:10, emoji:'🩺', cat:'people', langs:{en:'Doctor',  es:'Doctor',   fr:'Médecin',de:'Arzt',  pt:'Médico',  it:'Medico',     zh:'医生', ja:'医者',    ar:'طبيب', hi:'डॉक्टर'}},
+  {id:11, emoji:'📚', cat:'people', langs:{en:'Teacher', es:'Maestro',  fr:'Prof',  de:'Lehrer', pt:'Professor',it:'Insegnante',zh:'老师', ja:'先生',    ar:'معلم', hi:'शिक्षक'}},
+  // ── Feelings ─────────────────────────────────────────────────────────────
+  {id:20, emoji:'😊', cat:'feelings',langs:{en:'Happy',   es:'Feliz',    fr:'Heureux',  de:'Glücklich',  pt:'Feliz',    it:'Felice',      zh:'快乐', ja:'嬉しい',      ar:'سعيد',  hi:'खुश'}},
+  {id:21, emoji:'😢', cat:'feelings',langs:{en:'Sad',     es:'Triste',   fr:'Triste',   de:'Traurig',    pt:'Triste',   it:'Triste',      zh:'悲伤', ja:'悲しい',      ar:'حزين',  hi:'दुखी'}},
+  {id:22, emoji:'😠', cat:'feelings',langs:{en:'Angry',   es:'Enojado',  fr:'En colère',de:'Wütend',     pt:'Bravo',    it:'Arrabbiato',  zh:'愤怒', ja:'怒っている',  ar:'غاضب',  hi:'गुस्सा'}},
+  {id:23, emoji:'😨', cat:'feelings',langs:{en:'Scared',  es:'Asustado', fr:'Peur',     de:'Angst',      pt:'Assustado',it:'Spaventato',  zh:'害怕', ja:'怖い',        ar:'خائف',  hi:'डरा हुआ'}},
+  {id:24, emoji:'😴', cat:'feelings',langs:{en:'Tired',   es:'Cansado',  fr:'Fatigué',  de:'Müde',       pt:'Cansado',  it:'Stanco',      zh:'累了', ja:'疲れた',      ar:'متعب',  hi:'थका हुआ'}},
+  {id:25, emoji:'🍽️',cat:'feelings',langs:{en:'Hungry',  es:'Hambre',   fr:'Faim',     de:'Hungrig',    pt:'Com fome', it:'Fame',        zh:'饿了', ja:'お腹空いた',  ar:'جائع',  hi:'भूखा'}},
+  {id:26, emoji:'💧', cat:'feelings',langs:{en:'Thirsty', es:'Sed',      fr:'Soif',     de:'Durstig',    pt:'Com sede', it:'Sete',        zh:'渴了', ja:'喉が渇いた',  ar:'عطشان', hi:'प्यासा'}},
+  {id:27, emoji:'🤕', cat:'feelings',langs:{en:'Pain',    es:'Dolor',    fr:'Douleur',  de:'Schmerz',    pt:'Dor',      it:'Dolore',      zh:'疼痛', ja:'痛い',        ar:'ألم',   hi:'दर्द'}},
+  {id:28, emoji:'🤩', cat:'feelings',langs:{en:'Excited', es:'Emocionado',fr:'Excité',  de:'Aufgeregt',  pt:'Animado',  it:'Eccitato',    zh:'兴奋', ja:'興奮した',    ar:'متحمس', hi:'उत्साहित'}},
+  {id:29, emoji:'😑', cat:'feelings',langs:{en:'Bored',   es:'Aburrido', fr:'Ennuyé',   de:'Gelangweilt',pt:'Entediado',it:'Annoiato',    zh:'无聊', ja:'退屈',        ar:'ممل',   hi:'ऊब गया'}},
+  {id:30, emoji:'❤️', cat:'feelings',langs:{en:'Love',    es:'Amor',     fr:'Amour',    de:'Liebe',      pt:'Amor',     it:'Amore',       zh:'爱',   ja:'愛',          ar:'حب',    hi:'प्यार'}},
+  {id:31, emoji:'👍', cat:'feelings',langs:{en:'Good',    es:'Bien',     fr:'Bien',     de:'Gut',        pt:'Bom',      it:'Bene',        zh:'好',   ja:'いい',        ar:'جيد',   hi:'अच्छा'}},
+  {id:32, emoji:'👎', cat:'feelings',langs:{en:'Bad',     es:'Mal',      fr:'Mal',      de:'Schlecht',   pt:'Mal',      it:'Male',        zh:'坏',   ja:'悪い',        ar:'سيء',   hi:'बुरा'}},
+  // ── Actions ──────────────────────────────────────────────────────────────
+  {id:40, emoji:'🤲', cat:'actions', langs:{en:'Want',    es:'Quiero',   fr:'Veux',     de:'Will',       pt:'Quero',    it:'Voglio',      zh:'想要', ja:'欲しい',      ar:'أريد',  hi:'चाहना'}},
+  {id:41, emoji:'⚡', cat:'actions', langs:{en:'Need',    es:'Necesito', fr:'Besoin',   de:'Brauche',    pt:'Preciso',  it:'Ho bisogno',  zh:'需要', ja:'必要',        ar:'أحتاج', hi:'जरूरत'}},
+  {id:42, emoji:'🚶', cat:'actions', langs:{en:'Go',      es:'Ir',       fr:'Aller',    de:'Gehen',      pt:'Ir',       it:'Andare',      zh:'去',   ja:'行く',        ar:'اذهب',  hi:'जाओ'}},
+  {id:43, emoji:'👋', cat:'actions', langs:{en:'Come',    es:'Venir',    fr:'Venir',    de:'Kommen',     pt:'Vir',      it:'Venire',      zh:'来',   ja:'来る',        ar:'تعال',  hi:'आओ'}},
+  {id:44, emoji:'🍴', cat:'actions', langs:{en:'Eat',     es:'Comer',    fr:'Manger',   de:'Essen',      pt:'Comer',    it:'Mangiare',    zh:'吃',   ja:'食べる',      ar:'أكل',   hi:'खाना'}},
+  {id:45, emoji:'🥤', cat:'actions', langs:{en:'Drink',   es:'Beber',    fr:'Boire',    de:'Trinken',    pt:'Beber',    it:'Bere',        zh:'喝',   ja:'飲む',        ar:'اشرب',  hi:'पीना'}},
+  {id:46, emoji:'😴', cat:'actions', langs:{en:'Sleep',   es:'Dormir',   fr:'Dormir',   de:'Schlafen',   pt:'Dormir',   it:'Dormire',     zh:'睡觉', ja:'寝る',        ar:'نوم',   hi:'सोना'}},
+  {id:47, emoji:'🎮', cat:'actions', langs:{en:'Play',    es:'Jugar',    fr:'Jouer',    de:'Spielen',    pt:'Brincar',  it:'Giocare',     zh:'玩',   ja:'遊ぶ',        ar:'العب',  hi:'खेलना'}},
+  {id:48, emoji:'🆘', cat:'actions', langs:{en:'Help',    es:'Ayuda',    fr:'Aide',     de:'Hilfe',      pt:'Ajuda',    it:'Aiuto',       zh:'帮助', ja:'助けて',      ar:'مساعدة',hi:'मदद'}},
+  {id:49, emoji:'🛑', cat:'actions', langs:{en:'Stop',    es:'Para',     fr:'Arrête',   de:'Stopp',      pt:'Pare',     it:'Fermati',     zh:'停',   ja:'やめて',      ar:'توقف',  hi:'रुको'}},
+  {id:50, emoji:'➕', cat:'actions', langs:{en:'More',    es:'Más',      fr:'Plus',     de:'Mehr',       pt:'Mais',     it:'Di più',      zh:'更多', ja:'もっと',      ar:'أكثر',  hi:'और'}},
+  {id:51, emoji:'✅', cat:'actions', langs:{en:'Finish',  es:'Terminar', fr:'Finir',    de:'Fertig',     pt:'Acabar',   it:'Finire',      zh:'完成', ja:'終わり',      ar:'انتهى', hi:'खत्म'}},
+  {id:52, emoji:'😍', cat:'actions', langs:{en:'Like',    es:'Gustar',   fr:'Aimer',    de:'Mögen',      pt:'Gostar',   it:'Piacere',     zh:'喜欢', ja:'好き',        ar:'أحب',   hi:'पसंद'}},
+  {id:53, emoji:'🙅', cat:'actions', langs:{en:"Don't like",es:'No gustar',fr:'Pas aimer',de:'Nicht mögen',pt:'Não gostar',it:'Non piacere',zh:'不喜欢',ja:'嫌い',  ar:'لا أحب',hi:'पसंद नहीं'}},
+  {id:54, emoji:'✋', cat:'actions', langs:{en:'Have',    es:'Tener',    fr:'Avoir',    de:'Haben',      pt:'Ter',      it:'Avere',       zh:'有',   ja:'持っている',  ar:'لدي',   hi:'पास है'}},
+  {id:55, emoji:'👀', cat:'actions', langs:{en:'See',     es:'Ver',      fr:'Voir',     de:'Sehen',      pt:'Ver',      it:'Vedere',      zh:'看',   ja:'見る',        ar:'أرى',   hi:'देखना'}},
+  {id:56, emoji:'🎁', cat:'actions', langs:{en:'Give',    es:'Dar',      fr:'Donner',   de:'Geben',      pt:'Dar',      it:'Dare',        zh:'给',   ja:'あげる',      ar:'أعطي',  hi:'देना'}},
+  // ── Objects ──────────────────────────────────────────────────────────────
+  {id:70, emoji:'💧', cat:'objects', langs:{en:'Water',   es:'Agua',     fr:'Eau',      de:'Wasser',     pt:'Água',     it:'Acqua',       zh:'水',   ja:'水',          ar:'ماء',   hi:'पानी'}},
+  {id:71, emoji:'🍎', cat:'objects', langs:{en:'Food',    es:'Comida',   fr:'Nourriture',de:'Essen',     pt:'Comida',   it:'Cibo',        zh:'食物', ja:'食べ物',      ar:'طعام',  hi:'खाना'}},
+  {id:72, emoji:'🥛', cat:'objects', langs:{en:'Milk',    es:'Leche',    fr:'Lait',     de:'Milch',      pt:'Leite',    it:'Latte',       zh:'牛奶', ja:'ミルク',      ar:'حليب',  hi:'दूध'}},
+  {id:73, emoji:'💊', cat:'objects', langs:{en:'Medicine',es:'Medicina', fr:'Médicament',de:'Medizin',   pt:'Remédio',  it:'Medicina',    zh:'药',   ja:'薬',          ar:'دواء',  hi:'दवाई'}},
+  {id:74, emoji:'🧸', cat:'objects', langs:{en:'Toy',     es:'Juguete',  fr:'Jouet',    de:'Spielzeug',  pt:'Brinquedo',it:'Giocattolo',  zh:'玩具', ja:'おもちゃ',    ar:'لعبة',  hi:'खिलौना'}},
+  {id:75, emoji:'📱', cat:'objects', langs:{en:'Phone',   es:'Teléfono', fr:'Téléphone',de:'Telefon',    pt:'Telefone', it:'Telefono',    zh:'手机', ja:'携帯',        ar:'هاتف',  hi:'फोन'}},
+  {id:76, emoji:'📺', cat:'objects', langs:{en:'TV',      es:'Televisión',fr:'Télé',    de:'Fernseher',  pt:'TV',       it:'Televisione', zh:'电视', ja:'テレビ',      ar:'تلفاز', hi:'टीवी'}},
+  {id:77, emoji:'📖', cat:'objects', langs:{en:'Book',    es:'Libro',    fr:'Livre',    de:'Buch',       pt:'Livro',    it:'Libro',       zh:'书',   ja:'本',          ar:'كتاب',  hi:'किताब'}},
+  {id:78, emoji:'🎵', cat:'objects', langs:{en:'Music',   es:'Música',   fr:'Musique',  de:'Musik',      pt:'Música',   it:'Musica',      zh:'音乐', ja:'音楽',        ar:'موسيقى',hi:'संगीत'}},
+  {id:79, emoji:'👟', cat:'objects', langs:{en:'Shoes',   es:'Zapatos',  fr:'Chaussures',de:'Schuhe',    pt:'Sapatos',  it:'Scarpe',      zh:'鞋子', ja:'靴',          ar:'حذاء',  hi:'जूते'}},
+  // ── Places ───────────────────────────────────────────────────────────────
+  {id:90, emoji:'🏠', cat:'places',  langs:{en:'Home',    es:'Casa',     fr:'Maison',   de:'Zuhause',    pt:'Casa',     it:'Casa',        zh:'家',   ja:'家',          ar:'بيت',   hi:'घर'}},
+  {id:91, emoji:'🏫', cat:'places',  langs:{en:'School',  es:'Escuela',  fr:'École',    de:'Schule',     pt:'Escola',   it:'Scuola',      zh:'学校', ja:'学校',        ar:'مدرسة', hi:'स्कूल'}},
+  {id:92, emoji:'🏥', cat:'places',  langs:{en:'Hospital',es:'Hospital', fr:'Hôpital',  de:'Krankenhaus',pt:'Hospital', it:'Ospedale',    zh:'医院', ja:'病院',        ar:'مستشفى',hi:'अस्पताल'}},
+  {id:93, emoji:'🚽', cat:'places',  langs:{en:'Bathroom',es:'Baño',     fr:'Toilettes',de:'Toilette',   pt:'Banheiro', it:'Bagno',       zh:'厕所', ja:'トイレ',      ar:'حمام',  hi:'बाथरूम'}},
+  {id:94, emoji:'🍳', cat:'places',  langs:{en:'Kitchen', es:'Cocina',   fr:'Cuisine',  de:'Küche',      pt:'Cozinha',  it:'Cucina',      zh:'厨房', ja:'台所',        ar:'مطبخ',  hi:'रसोई'}},
+  {id:95, emoji:'🌳', cat:'places',  langs:{en:'Outside', es:'Afuera',   fr:'Dehors',   de:'Draußen',    pt:'Fora',     it:'Fuori',       zh:'外面', ja:'外',          ar:'خارج',  hi:'बाहर'}},
+  {id:96, emoji:'🚗', cat:'places',  langs:{en:'Car',     es:'Carro',    fr:'Voiture',  de:'Auto',       pt:'Carro',    it:'Macchina',    zh:'汽车', ja:'車',          ar:'سيارة', hi:'कार'}},
+  {id:97, emoji:'🌿', cat:'places',  langs:{en:'Park',    es:'Parque',   fr:'Parc',     de:'Park',       pt:'Parque',   it:'Parco',       zh:'公园', ja:'公園',        ar:'حديقة', hi:'पार्क'}},
+  {id:98, emoji:'🛒', cat:'places',  langs:{en:'Store',   es:'Tienda',   fr:'Magasin',  de:'Laden',      pt:'Loja',     it:'Negozio',     zh:'商店', ja:'お店',        ar:'متجر',  hi:'दुकान'}},
+  // ── Descriptors ──────────────────────────────────────────────────────────
+  {id:110,emoji:'✅', cat:'descriptors',langs:{en:'Yes',   es:'Sí',       fr:'Oui',      de:'Ja',         pt:'Sim',      it:'Sì',          zh:'是',   ja:'はい',        ar:'نعم',   hi:'हाँ'}},
+  {id:111,emoji:'❌', cat:'descriptors',langs:{en:'No',    es:'No',       fr:'Non',      de:'Nein',       pt:'Não',      it:'No',          zh:'不',   ja:'いいえ',      ar:'لا',    hi:'नहीं'}},
+  {id:112,emoji:'🙏', cat:'descriptors',langs:{en:'Please',es:'Por favor',fr:'S\'il vous plaît',de:'Bitte',pt:'Por favor',it:'Per favore',zh:'请',  ja:'お願い',      ar:'من فضلك',hi:'कृपया'}},
+  {id:113,emoji:'💛', cat:'descriptors',langs:{en:'Thank you',es:'Gracias',fr:'Merci',   de:'Danke',      pt:'Obrigado', it:'Grazie',      zh:'谢谢', ja:'ありがとう',  ar:'شكرا',  hi:'धन्यवाद'}},
+  {id:114,emoji:'🔥', cat:'descriptors',langs:{en:'Hot',   es:'Caliente', fr:'Chaud',    de:'Heiß',       pt:'Quente',   it:'Caldo',       zh:'热',   ja:'熱い',        ar:'ساخن',  hi:'गरम'}},
+  {id:115,emoji:'🧊', cat:'descriptors',langs:{en:'Cold',  es:'Frío',     fr:'Froid',    de:'Kalt',       pt:'Frio',     it:'Freddo',      zh:'冷',   ja:'寒い',        ar:'بارد',  hi:'ठंडा'}},
+  {id:116,emoji:'🔵', cat:'descriptors',langs:{en:'Big',   es:'Grande',   fr:'Grand',    de:'Groß',       pt:'Grande',   it:'Grande',      zh:'大',   ja:'大きい',      ar:'كبير',  hi:'बड़ा'}},
+  {id:117,emoji:'🔹', cat:'descriptors',langs:{en:'Small', es:'Pequeño',  fr:'Petit',    de:'Klein',      pt:'Pequeno',  it:'Piccolo',     zh:'小',   ja:'小さい',      ar:'صغير',  hi:'छोटा'}},
+  {id:118,emoji:'⏰', cat:'descriptors',langs:{en:'Now',   es:'Ahora',    fr:'Maintenant',de:'Jetzt',     pt:'Agora',    it:'Adesso',      zh:'现在', ja:'今',          ar:'الآن',  hi:'अभी'}},
+  {id:119,emoji:'🕐', cat:'descriptors',langs:{en:'Later', es:'Después',  fr:'Plus tard',de:'Später',     pt:'Depois',   it:'Dopo',        zh:'以后', ja:'後で',        ar:'لاحقاً',hi:'बाद में'}},
+  // ── Questions ────────────────────────────────────────────────────────────
+  {id:130,emoji:'❓', cat:'questions',langs:{en:'What',   es:'Qué',      fr:'Quoi',     de:'Was',        pt:'O quê',    it:'Cosa',        zh:'什么', ja:'何',          ar:'ماذا',  hi:'क्या'}},
+  {id:131,emoji:'📍', cat:'questions',langs:{en:'Where',  es:'Dónde',    fr:'Où',       de:'Wo',         pt:'Onde',     it:'Dove',        zh:'哪里', ja:'どこ',        ar:'أين',   hi:'कहाँ'}},
+  {id:132,emoji:'🕐', cat:'questions',langs:{en:'When',   es:'Cuándo',   fr:'Quand',    de:'Wann',       pt:'Quando',   it:'Quando',      zh:'什么时候',ja:'いつ',     ar:'متى',   hi:'कब'}},
+  {id:133,emoji:'🧐', cat:'questions',langs:{en:'Who',    es:'Quién',    fr:'Qui',      de:'Wer',        pt:'Quem',     it:'Chi',         zh:'谁',   ja:'誰',          ar:'من',    hi:'कौन'}},
+  {id:134,emoji:'🤔', cat:'questions',langs:{en:'Why',    es:'Por qué',  fr:'Pourquoi', de:'Warum',      pt:'Por quê',  it:'Perché',      zh:'为什么',ja:'なぜ',      ar:'لماذا', hi:'क्यों'}},
+  {id:135,emoji:'💭', cat:'questions',langs:{en:'How',    es:'Cómo',     fr:'Comment',  de:'Wie',        pt:'Como',     it:'Come',        zh:'怎么', ja:'どうやって',  ar:'كيف',   hi:'कैसे'}},
+  {id:136,emoji:'🙋', cat:'questions',langs:{en:'Can I',  es:'Puedo',    fr:'Puis-je',  de:'Kann ich',   pt:'Posso',    it:'Posso',       zh:'我可以',ja:'してもいい',  ar:'هل يمكنني',hi:'क्या मैं'}},
+  // ── Phrases ──────────────────────────────────────────────────────────────
+  {id:150,emoji:'🚽',cat:'phrases',phrase:true,langs:{
+    en:'I want to go to the bathroom',   es:'Quiero ir al baño',
+    fr:'Je veux aller aux toilettes',    de:'Ich möchte zur Toilette',
+    pt:'Quero ir ao banheiro',           it:'Voglio andare in bagno',
+    zh:'我想去洗手间',                    ja:'トイレに行きたいです',
+    ar:'أريد الذهاب إلى الحمام',         hi:'मुझे बाथरूम जाना है'}},
+  {id:151,emoji:'🍽️',cat:'phrases',phrase:true,langs:{
+    en:'I am hungry',        es:'Tengo hambre',      fr:'J\'ai faim',
+    de:'Ich habe Hunger',   pt:'Estou com fome',    it:'Ho fame',
+    zh:'我饿了',              ja:'お腹が空いています', ar:'أنا جائع',  hi:'मुझे भूख लगी है'}},
+  {id:152,emoji:'💧',cat:'phrases',phrase:true,langs:{
+    en:'I am thirsty',       es:'Tengo sed',         fr:'J\'ai soif',
+    de:'Ich habe Durst',    pt:'Estou com sede',    it:'Ho sete',
+    zh:'我渴了',              ja:'のどが渇いています',  ar:'أنا عطشان', hi:'मुझे प्यास लगी है'}},
+  {id:153,emoji:'🆘',cat:'phrases',phrase:true,langs:{
+    en:'I need help',        es:'Necesito ayuda',    fr:'J\'ai besoin d\'aide',
+    de:'Ich brauche Hilfe', pt:'Preciso de ajuda',  it:'Ho bisogno di aiuto',
+    zh:'我需要帮助',          ja:'助けてください',    ar:'أحتاج مساعدة', hi:'मुझे मदद चाहिए'}},
+  {id:154,emoji:'🤕',cat:'phrases',phrase:true,langs:{
+    en:'I am in pain',       es:'Tengo dolor',       fr:'J\'ai mal',
+    de:'Ich habe Schmerzen',pt:'Estou com dor',     it:'Ho dolore',
+    zh:'我很痛',              ja:'痛いです',          ar:'أنا في ألم',  hi:'मुझे दर्द हो रहा है'}},
+  {id:155,emoji:'🏠',cat:'phrases',phrase:true,langs:{
+    en:'I want to go home',  es:'Quiero ir a casa',  fr:'Je veux rentrer chez moi',
+    de:'Ich möchte nach Hause',pt:'Quero ir para casa',it:'Voglio andare a casa',
+    zh:'我想回家',            ja:'家に帰りたいです',  ar:'أريد الذهاب إلى المنزل', hi:'मैं घर जाना चाहता हूँ'}},
+  {id:156,emoji:'😴',cat:'phrases',phrase:true,langs:{
+    en:'I am tired',         es:'Estoy cansado',     fr:'Je suis fatigué',
+    de:'Ich bin müde',      pt:'Estou cansado',     it:'Sono stanco',
+    zh:'我累了',              ja:'疲れています',      ar:'أنا متعب',   hi:'मैं थका हुआ हूँ'}},
+  {id:157,emoji:'😊',cat:'phrases',phrase:true,langs:{
+    en:'I am happy',         es:'Estoy feliz',       fr:'Je suis heureux',
+    de:'Ich bin glücklich', pt:'Estou feliz',       it:'Sono felice',
+    zh:'我很快乐',            ja:'幸せです',          ar:'أنا سعيد',   hi:'मैं खुश हूँ'}},
+  {id:158,emoji:'🤷',cat:'phrases',phrase:true,langs:{
+    en:'I don\'t understand',es:'No entiendo',       fr:'Je ne comprends pas',
+    de:'Ich verstehe nicht',pt:'Não entendo',       it:'Non capisco',
+    zh:'我不明白',            ja:'分かりません',      ar:'لا أفهم',    hi:'मुझे समझ नहीं आया'}},
+  {id:159,emoji:'🐢',cat:'phrases',phrase:true,langs:{
+    en:'Please slow down',   es:'Más despacio por favor', fr:'Parlez plus lentement',
+    de:'Langsamer bitte',   pt:'Fale mais devagar', it:'Parla più lentamente',
+    zh:'请慢一点',            ja:'ゆっくり話してください', ar:'تحدث ببطء من فضلك', hi:'कृपया धीरे बोलें'}},
+  {id:160,emoji:'✅',cat:'phrases',phrase:true,langs:{
+    en:'Yes please',         es:'Sí por favor',      fr:'Oui s\'il vous plaît',
+    de:'Ja bitte',          pt:'Sim por favor',     it:'Sì per favore',
+    zh:'是的，请',            ja:'はい、お願いします', ar:'نعم من فضلك', hi:'हाँ, कृपया'}},
+  {id:161,emoji:'❌',cat:'phrases',phrase:true,langs:{
+    en:'No thank you',       es:'No gracias',        fr:'Non merci',
+    de:'Nein danke',        pt:'Não obrigado',      it:'No grazie',
+    zh:'不，谢谢',            ja:'いいえ、けっこうです', ar:'لا شكرا',  hi:'नहीं, धन्यवाद'}},
+  {id:162,emoji:'❤️',cat:'phrases',phrase:true,langs:{
+    en:'I love you',         es:'Te quiero',         fr:'Je t\'aime',
+    de:'Ich liebe dich',    pt:'Eu te amo',         it:'Ti voglio bene',
+    zh:'我爱你',              ja:'愛しています',      ar:'أحبك',       hi:'मैं तुमसे प्यार करता हूँ'}},
+  {id:163,emoji:'😔',cat:'phrases',phrase:true,langs:{
+    en:'I am scared',        es:'Tengo miedo',       fr:'J\'ai peur',
+    de:'Ich habe Angst',    pt:'Estou com medo',    it:'Ho paura',
+    zh:'我很害怕',            ja:'怖いです',          ar:'أنا خائف',   hi:'मैं डरा हुआ हूँ'}},
+  {id:164,emoji:'✋',cat:'phrases',phrase:true,langs:{
+    en:'I am done',          es:'Ya terminé',        fr:'J\'ai fini',
+    de:'Ich bin fertig',    pt:'Terminei',          it:'Ho finito',
+    zh:'我做完了',            ja:'終わりました',      ar:'لقد انتهيت', hi:'मैं खत्म कर चुका हूँ'}},
 
-// ── Init ───────────────────────────────────────────────────────────────────
+  // ── ADD YOUR OWN SYMBOLS HERE ────────────────────────────────────────────
+  // Single word:
+  // { id:999, emoji:'🦷', cat:'objects', langs:{ en:'Toothbrush', es:'Cepillo', fr:'Brosse à dents', de:'Zahnbürste' } },
+  //
+  // Full phrase:
+  // { id:998, emoji:'😎', cat:'phrases', phrase:true, langs:{ en:'I want to watch TV', es:'Quiero ver la televisión' } },
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════════════════
+let sentence      = [];
+let currentCat    = 'all';
+let currentLang   = 'en';
+let currentGender = 'any';   // 'male' | 'female' | 'any'
+let allVoices     = [];
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════════════════
 function init() {
+  buildLangDropdown();
   renderCatTabs();
-  renderGrid(currentCat);
+  renderGrid();
   loadVoices();
-  if (speechSynthesis.onvoiceschanged !== undefined) {
+  if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined)
     speechSynthesis.onvoiceschanged = loadVoices;
-  }
-}
-
-function loadVoices() {
-  voices = speechSynthesis.getVoices();
-  const sel = document.getElementById('voiceSelect');
-  sel.innerHTML = '';
-  // Prefer English voices
-  const english = voices.filter(v => v.lang.startsWith('en'));
-  const list = english.length ? english : voices;
-  list.forEach((v, i) => {
-    const opt = document.createElement('option');
-    opt.value = voices.indexOf(v);
-    opt.textContent = `${v.name} (${v.lang})`;
-    sel.appendChild(opt);
+  document.getElementById('ttsText').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); speakCustom(); }
   });
 }
 
-// ── Render ─────────────────────────────────────────────────────────────────
+// ── Language dropdown ──────────────────────────────────────────────────────
+function buildLangDropdown() {
+  const sel = document.getElementById('langSelect');
+  sel.innerHTML = '';
+  LANGUAGES.forEach(l => {
+    const o = document.createElement('option');
+    o.value = l.code;
+    o.textContent = `${l.flag} ${l.label}`;
+    sel.appendChild(o);
+  });
+  sel.value = currentLang;
+}
+
+function onLangChange() {
+  currentLang = document.getElementById('langSelect').value;
+  renderGrid();
+  updateVoiceList();
+}
+
+// ── Voices ─────────────────────────────────────────────────────────────────
+function loadVoices() {
+  allVoices = speechSynthesis.getVoices();
+  updateVoiceList();
+}
+
+function getLangConfig() {
+  return LANGUAGES.find(l => l.code === currentLang) || LANGUAGES[0];
+}
+
+function guessGender(voice) {
+  const cfg  = getLangConfig();
+  const name = voice.name.toLowerCase();
+  if ((cfg.genderHints?.female || []).some(h => name.includes(h))) return 'female';
+  if ((cfg.genderHints?.male   || []).some(h => name.includes(h))) return 'male';
+  return 'unknown';
+}
+
+function updateVoiceList() {
+  const cfg       = getLangConfig();
+  const langCodes = cfg.accents.map(a => a.langCode);
+  let pool = allVoices.filter(v =>
+    langCodes.some(lc => v.lang === lc) ||
+    v.lang.startsWith(cfg.code + '-')   ||
+    v.lang === cfg.code
+  );
+  if (!pool.length) pool = allVoices;
+
+  if (currentGender !== 'any') {
+    const filtered = pool.filter(v => guessGender(v) === currentGender);
+    if (filtered.length) pool = filtered;
+  }
+
+  const sel = document.getElementById('voiceSelect');
+  sel.innerHTML = '';
+
+  // Group by accent label
+  const accentMap = {};
+  cfg.accents.forEach(a => { accentMap[a.langCode] = a.label; });
+  const groups = {};
+  pool.forEach(v => {
+    const key = accentMap[v.lang] || v.lang;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(v);
+  });
+
+  Object.entries(groups).forEach(([label, voices]) => {
+    const grp = document.createElement('optgroup');
+    grp.label = label;
+    voices.forEach(v => {
+      const o = document.createElement('option');
+      o.value = allVoices.indexOf(v);
+      const gIcon = guessGender(v) === 'female' ? ' ♀' : guessGender(v) === 'male' ? ' ♂' : '';
+      o.textContent = v.name.replace(/\(.*?\)/g,'').trim() + gIcon;
+      grp.appendChild(o);
+    });
+    sel.appendChild(grp);
+  });
+}
+
+function setGender(g) {
+  currentGender = (currentGender === g) ? 'any' : g;
+  document.getElementById('btnFemale').classList.toggle('on', currentGender === 'female');
+  document.getElementById('btnMale').classList.toggle('on', currentGender === 'male');
+  updateVoiceList();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════════════════════════
+function getLabel(sym) {
+  return sym.langs[currentLang] || sym.langs['en'] || '';
+}
+
 function renderCatTabs() {
-  const container = document.getElementById('catTabs');
-  container.innerHTML = '';
-  categories.forEach(cat => {
+  const wrap = document.getElementById('catTabs');
+  wrap.innerHTML = '';
+  CATEGORIES.forEach(cat => {
     const btn = document.createElement('button');
-    btn.className = 'cat-tab' + (cat.id === currentCat ? ' active' : '');
+    btn.className = 'cat-tab' + (cat.id === currentCat ? ' on' : '');
     btn.style.background = cat.color;
     btn.textContent = cat.label;
     btn.onclick = () => {
       currentCat = cat.id;
-      document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderGrid(cat.id);
+      document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      renderGrid();
     };
-    container.appendChild(btn);
+    wrap.appendChild(btn);
   });
 }
 
-function renderGrid(cat) {
-  const grid = document.getElementById('symbolGrid');
+function renderGrid() {
+  const grid = document.getElementById('symGrid');
   grid.innerHTML = '';
-  const list = cat === 'all' ? symbols : symbols.filter(s => s.cat === cat);
+  const list = currentCat === 'all' ? SYMBOLS : SYMBOLS.filter(s => s.cat === currentCat);
   list.forEach(sym => {
     const btn = document.createElement('button');
-    btn.className = `symbol-btn cat-${sym.cat}${sym.phrase ? ' phrase' : ''}`;
-    btn.innerHTML = `<span class="symbol-emoji">${sym.emoji}</span><span class="symbol-label">${sym.label}</span>`;
-    btn.onclick = () => addWord(sym.label);
+    btn.className = `sym-btn cat-${sym.cat}${sym.phrase ? ' phrase' : ''}`;
+    btn.innerHTML = `<span class="sym-emoji">${sym.emoji}</span><span class="sym-label">${getLabel(sym)}</span>`;
+    btn.onclick = () => addWord(sym);
     grid.appendChild(btn);
   });
 }
 
-// ── Sentence Logic ─────────────────────────────────────────────────────────
-function addWord(word) {
-  sentence.push(word);
+// ═══════════════════════════════════════════════════════════════════════════
+//  SENTENCE
+// ═══════════════════════════════════════════════════════════════════════════
+function addWord(sym) {
+  const label = getLabel(sym);
+  sentence.push(label);
   renderSentence();
-  // Auto-speak single phrase
-  const sym = symbols.find(s => s.label === word);
-  if (sym && sym.phrase) {
-    speakText(word);
-  }
+  if (sym.phrase) speakText(label);
 }
 
 function renderSentence() {
-  const bar = document.getElementById('sentenceBar');
-  const ph  = document.getElementById('placeholder');
-  // Remove old chips
-  bar.querySelectorAll('.word-chip').forEach(c => c.remove());
+  const chipArea = document.getElementById('chipArea');
+  const ph       = document.getElementById('sbPlaceholder');
+
+  // Remove all existing chips (keep placeholder element in DOM)
+  Array.from(chipArea.querySelectorAll('.word-chip')).forEach(c => c.remove());
+
   if (sentence.length === 0) {
     ph.style.display = '';
   } else {
@@ -639,16 +616,13 @@ function renderSentence() {
       chip.textContent = word;
       chip.title = 'Tap to remove';
       chip.onclick = () => { sentence.splice(i, 1); renderSentence(); };
-      bar.appendChild(chip);
+      chipArea.appendChild(chip);
     });
   }
 }
 
 function backspace() {
-  if (sentence.length > 0) {
-    sentence.pop();
-    renderSentence();
-  }
+  if (sentence.length) { sentence.pop(); renderSentence(); }
 }
 
 function clearSentence() {
@@ -657,47 +631,45 @@ function clearSentence() {
   speechSynthesis.cancel();
 }
 
-// ── TTS ───────────────────────────────────────────────────────────────────
-function speakText(text, rate, pitch, voiceIdx) {
-  if (!text.trim()) return;
+// ═══════════════════════════════════════════════════════════════════════════
+//  TTS
+// ═══════════════════════════════════════════════════════════════════════════
+function speakText(text) {
+  if (!text?.trim()) return;
   speechSynthesis.cancel();
-  const utt = new SpeechSynthesisUtterance(text);
-  utt.rate  = rate  ?? parseFloat(document.getElementById('rateSlider').value);
-  utt.pitch = pitch ?? parseFloat(document.getElementById('pitchSlider').value);
-  const vi = voiceIdx ?? parseInt(document.getElementById('voiceSelect').value);
-  if (!isNaN(vi) && voices[vi]) utt.voice = voices[vi];
-  utt.onstart = () => {
-    isSpeaking = true;
-    document.getElementById('btnSpeak').classList.add('speaking');
-  };
-  utt.onend = utt.onerror = () => {
-    isSpeaking = false;
-    document.getElementById('btnSpeak').classList.remove('speaking');
-  };
+  const utt   = new SpeechSynthesisUtterance(text);
+  utt.rate    = parseFloat(document.getElementById('rateSlider').value);
+  utt.pitch   = parseFloat(document.getElementById('pitchSlider').value);
+  const vi    = parseInt(document.getElementById('voiceSelect').value);
+  if (!isNaN(vi) && allVoices[vi]) utt.voice = allVoices[vi];
+  utt.onstart = () => document.getElementById('btnSpeak').classList.add('speaking');
+  utt.onend   = () => document.getElementById('btnSpeak').classList.remove('speaking');
+  utt.onerror = () => document.getElementById('btnSpeak').classList.remove('speaking');
   speechSynthesis.speak(utt);
 }
 
 function speakSentence() {
-  if (sentence.length === 0) { showToast('Add some words first!'); return; }
+  if (!sentence.length) { showToast('Add some words first!'); return; }
   speakText(sentence.join(' '));
 }
 
 function speakCustom() {
-  const txt = document.getElementById('ttsText').value.trim();
-  if (!txt) { showToast('Type something to speak'); return; }
-  speakText(txt);
+  const t = document.getElementById('ttsText').value.trim();
+  if (!t) { showToast('Type something to speak'); return; }
+  speakText(t);
 }
 
-// ── TTS Panel Toggle ───────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+//  UI HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
 function toggleTTS() {
   const panel = document.getElementById('ttsPanel');
-  const btn   = document.getElementById('btnTTSToggle');
-  const isOpen = panel.classList.toggle('open');
-  btn.classList.toggle('active', isOpen);
-  if (isOpen) document.getElementById('ttsText').focus();
+  const btn   = document.getElementById('btnWrite');
+  const open  = panel.classList.toggle('open');
+  btn.classList.toggle('on', open);
+  if (open) { updateVoiceList(); document.getElementById('ttsText').focus(); }
 }
 
-// ── Toast ──────────────────────────────────────────────────────────────────
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -705,14 +677,8 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-// ── Also speak sentence on Enter in textarea ───────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('ttsText').addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); speakCustom(); }
-  });
-  init();
-});
+document.addEventListener('DOMContentLoaded', init);
 </script>
-
 </body>
 </html>
+
